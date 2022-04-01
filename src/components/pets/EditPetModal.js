@@ -1,23 +1,11 @@
 import React, { useState } from 'react'
-import { Form, Container, Button } from 'react-bootstrap'
-import { createPet } from '../../api/pets'
-import {createPetSuccess, createPetFailure} from '../shared/AutoDismissAlert/messages'
-import { useNavigate } from 'react-router-dom'
+import {Modal} from 'react-bootstrap'
 import PetForm from '../shared/PetForm'
 
-// create pet renders a form and calls createPet function
-// maybe redirect(navigate) to the new pet show page
-// props we'll need are user, msgAlert
-const CreatePet = (props) => {
-    const {user, msgAlert} = props
-    console.log('user in create', user)
-    const navigate = useNavigate()
-    // we'll need two states
-    const [pet, setPet] = useState({name: '', type: '', age: '', adoptable: false})
-    console.log('pet in create', pet)
-    //  an empty pet object
-    // and a createdId (used to navigate)
-    // we'll need handleChange and handleSubmit funcs
+const EditPetModal = (props) => {
+    const { user, show, handleClose, updatePet, msgAlert, triggerRefresh } = props
+    const [pet, setPet] = useState(props.pet)
+
     const handleChange = (e) => {
         // e === event
         e.persist()
@@ -50,34 +38,41 @@ const CreatePet = (props) => {
         // e === event
         e.preventDefault()
 
-        createPet(user, pet)
+        console.log('the pet to submit', pet)
+        updatePet(user, pet)
             // if create is successful, we should navigate to the show page
-            .then(res => {navigate(`/pets/${res.data.pet.id}`)})
+            .then(() => handleClose())
             // then we send a success message
             .then(() =>
                 msgAlert({
-                    heading: 'Pet Added! Success!',
-                    message: createPetSuccess,
+                    heading: 'Pet Updated! Success!',
+                    message: 'u did it',
                     variant: 'success',
                 }))
+            .then(() => triggerRefresh())
             // if there is an error, we'll send an error message
             .catch(() =>
                 msgAlert({
                     heading: 'Oh No!',
-                    message: createPetFailure,
+                    message: 'that aint it',
                     variant: 'danger',
                 }))
-        // console.log('this is the pet', pet)
+        console.log('this is the pet', pet)
     }
 
     return (
-        <PetForm 
-            pet={pet}
-            handleChange={handleChange}
-            handleSubmit={handleSubmit}
-            heading="Add new pet!"
-        />
+        <Modal show={show} onHide={handleClose}>
+            <Modal.Header closeButton></Modal.Header>
+            <Modal.Body>
+                <PetForm 
+                    pet={pet}
+                    handleChange={handleChange}
+                    handleSubmit={handleSubmit}
+                    heading="Edit pet!"
+                />
+            </Modal.Body>
+        </Modal>
     )
 }
-
-export default CreatePet
+    
+export default EditPetModal
